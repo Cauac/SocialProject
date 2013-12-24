@@ -1,0 +1,24 @@
+<div ng-controller="MenuController">
+    <div class="row">
+        <div class="col-lg-1">
+            <span>{{username}}</span>
+            <a type="button" ng-click="logout()"> <span class="glyphicon glyphicon-log-out"></span></a>
+        </div>
+
+        <div ng-show="role=='ROLE_USER'" class="col-lg-8 col-lg-offset-2 btn-group text-center">
+            <a type="button" class="btn btn-default btn-lg" href="#/photos" id="photos">Photo</a>
+            <a type="button" class="btn btn-default btn-lg" href="#/comments" id="comments">Comments</a>
+            <a type="button" class="btn btn-default btn-lg" href="#/tokens" id="tokens">My Accounts</a>
+            <a type="button" class="btn btn-default btn-lg" href="#/possibleFriends" id="possibleFriends">Find Friends</a>
+            <a type="button" class="btn btn-default btn-lg" href="#/friends" id="friends">My Friends</a>
+            <a type="button" class="btn btn-default btn-lg" href="#/statistic" id="statistic">My Statistic</a>
+        </div>
+
+        <div ng-show="role=='ROLE_ADMIN'" class="col-lg-2 col-lg-offset-4 btn-group text-center">
+            <a type="button" class="btn btn-default btn-lg" href="#/admin">Users</a>
+            <a type="button" class="btn btn-default btn-lg" href="#/errors">Errors</a>
+        </div>
+    </div>
+</div>
+
+<hr class=""/>

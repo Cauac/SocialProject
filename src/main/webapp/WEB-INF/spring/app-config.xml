@@ -1,0 +1,107 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/mvc    http://www.springframework.org/schema/mvc/spring-mvc.xsd
+        http://www.springframework.org/schema/context  http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+    <tx:annotation-driven transaction-manager="transactionManager"/>
+    <mvc:annotation-driven/>
+    <context:component-scan base-package="angularspringapp"/>
+    <!--<import resource="jms-config.xml"/>-->
+    <import resource="twitter-config.xml"/>
+
+    <bean class="angularspringapp.services.DeliciousService">
+        <property name="key"
+                  value="dj0yJmk9VXRlckc0cGdySGxsJmQ9WVdrOVNXZEtiMWhPTm04bWNHbzlNekEwT1RnNU16WXkmcz1jb25zdW1lcnNlY3JldCZ4PTNk"/>
+        <property name="secret" value="fda55d2dbaba6bd8b71060e7a476cb2ff16a4dd9"/>
+        <property name="callback" value="127.0.0.1:8080/getDeliciousAccessToken"/>
+    </bean>
+
+    <bean class="angularspringapp.services.FlickrService">
+        <property name="key" value="1385f8e7e384291af2c42ddcba583fe1"/>
+        <property name="secret" value="eb6c32e797653750"/>
+        <property name="callback" value="http://127.0.0.1:8080/getFlickrAccessToken"/>
+    </bean>
+
+    <bean name="MongoClient" class="com.mongodb.MongoClient">
+        <constructor-arg>
+            <value type="java.lang.String">127.0.0.1</value>
+        </constructor-arg>
+        <constructor-arg>
+            <value type="java.lang.Integer">27017</value>
+        </constructor-arg>
+    </bean>
+
+    <bean class="angularspringapp.dao.MongoUserDAO">
+        <property name="mongoClient" ref="MongoClient"/>
+        <property name="dbName" value="local"/>
+    </bean>
+
+    <bean class="angularspringapp.dao.MongoFlickrDAO">
+        <property name="mongoClient" ref="MongoClient"/>
+        <property name="dbName" value="local"/>
+    </bean>
+
+    <bean class="angularspringapp.analyzer.FlickrAnalyzer">
+        <property name="mongoClient" ref="MongoClient"/>
+        <property name="dbName" value="local"/>
+    </bean>
+
+    <bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
+        <property name="host" value="smtp.gmail.com"/>
+        <property name="port" value="587"/>
+        <property name="username" value="dantonproject@gmail.com"/>
+        <property name="password" value="155458727"/>
+
+        <property name="javaMailProperties">
+            <props>
+                <prop key="mail.smtp.auth">true</prop>
+                <prop key="mail.smtp.starttls.enable">true</prop>
+            </props>
+        </property>
+    </bean>
+
+    <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="driverClassName" value="com.microsoft.sqlserver.jdbc.SQLServerDriver"/>
+        <property name="url" value="jdbc:sqlserver://localhost:1433;DatabaseName=testDB;integratedSecurity=true"/>
+        <property name="username" value="ICX\anton.haranski"/>
+        <property name="password" value="1234567"/>
+    </bean>
+
+    <bean id="sessionFactory" class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="annotatedClasses">
+            <list>
+                <value>angularspringapp.entity.User</value>
+                <value>angularspringapp.entity.Audit</value>
+                <value>angularspringapp.entity.Payment</value>
+            </list>
+        </property>
+        <property name="hibernateProperties">
+            <props>
+                <prop key="hibernate.dialect">org.hibernate.dialect.SQLServer2008Dialect</prop>
+                <prop key="hibernate.show_sql">true</prop>
+                <prop key="current_session_context_class">org.hibernate.context.ThreadLocalSessionContext</prop>
+                <prop key="generateDdl">true"</prop>
+            </props>
+        </property>
+    </bean>
+
+    <bean id="transactionManager" class="org.springframework.orm.hibernate3.HibernateTransactionManager">
+        <property name="sessionFactory" ref="sessionFactory"/>
+    </bean>
+
+
+    <!--<bean class="angularspringapp.loader.LoaderThreadRunner" lazy-init="false">-->
+    <!--<property name="loadersThreadList">-->
+    <!--<list>-->
+    <!--<ref local="flickrLoaderThread"/>-->
+    <!--</list>-->
+    <!--</property>-->
+    <!--</bean>-->
+</beans>

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="amqConnectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory">
+        <property name="brokerURL" value="tcp://localhost:61616"/>
+    </bean>
+
+    <bean id="connectionFactory" class="org.springframework.jms.connection.CachingConnectionFactory">
+        <constructor-arg ref="amqConnectionFactory"/>
+    </bean>
+
+    <bean id="loaderDestination" class="org.apache.activemq.command.ActiveMQQueue">
+        <constructor-arg index="0" value="UploadQueue"/>
+    </bean>
+
+    <bean id="mailDestination" class="org.apache.activemq.command.ActiveMQQueue">
+        <constructor-arg index="0" value="MailQueue"/>
+    </bean>
+
+    <bean id="loaderQueue" class="org.springframework.jms.core.JmsTemplate">
+        <property name="connectionFactory" ref="connectionFactory"/>
+        <property name="defaultDestination" ref="loaderDestination"/>
+    </bean>
+
+    <bean id="mailQueue" class="org.springframework.jms.core.JmsTemplate">
+        <property name="connectionFactory" ref="connectionFactory"/>
+        <property name="defaultDestination" ref="mailDestination"/>
+    </bean>
+
+    <bean id="messageSender" class="angularspringapp.services.jms.JMSMessageSender">
+        <constructor-arg index="0" ref="loaderQueue"/>
+        <constructor-arg index="1" ref="mailQueue"/>
+    </bean>
+
+    <bean id="messageReceiver" class="angularspringapp.services.jms.receiver.LoaderReceiver"/>
+
+    <bean id="mailReceiver" class="angularspringapp.services.jms.receiver.MailReceiver">
+        <property name="applicationMail" value="dantonproject@gmail.com"/>
+        <property name="deliveryMaxRepeat" value="5"/>
+    </bean>
+
+    <bean id="analyzerListener" class="org.springframework.jms.listener.SimpleMessageListenerContainer">
+        <property name="connectionFactory" ref="connectionFactory"/>
+        <property name="destinationName" value="UploadQueue"/>
+        <property name="messageListener" ref="messageReceiver"/>
+    </bean>
+
+    <bean id="mailListener" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+        <property name="connectionFactory" ref="connectionFactory"/>
+        <property name="destinationName" value="MailQueue"/>
+        <property name="messageListener" ref="mailReceiver"/>
+        <property name="sessionTransacted" value="true"/>
+        <property name="messageSelector" value="type='SEND_MESSAGE'"/>
+    </bean>
+
+    <bean id="errorBrowser" class="angularspringapp.services.jms.Browser">
+        <property name="connectionFactory" ref="connectionFactory"/>
+    </bean>
+
+</beans>

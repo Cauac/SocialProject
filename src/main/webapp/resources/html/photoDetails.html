@@ -1,0 +1,25 @@
+<div class="modal-header">
+    <h3 class="text-center">COMMENTS</h3>
+</div>
+<div ng-init="initChart()" class="modal-body">
+    <div id="chartContainer" style="width: 538px; height: 200px; margin: 0 auto"></div>
+    <table class="table table-bordered table-striped" style="width:980px;" ng-show="comments.length > 0">
+        <thead>
+        <tr>
+            <th style="text-align: center;">User</th>
+            <th style="text-align: center;">Comment</th>
+            <th style="text-align: center;">Date</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr ng-repeat="comment in comments">
+            <td>{{comment.username}}</td>
+            <td>{{comment._content}}</td>
+            <td>{{comment.dateadded+'000' | date:'medium'}}</td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+<div class="modal-footer">
+    <button class="btn btn-primary" ng-click="ok()">OK</button>
+</div>

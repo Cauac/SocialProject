@@ -1,0 +1,32 @@
+<div class="well" style="max-width: 400px; margin: 0 auto 10px;">
+    <h3 class="text-center">Authentication</h3>
+
+    <div ng-show="alertMessage" class="alert alert-danger">{{alertMessage}}</div>
+    <form name="MyForm">
+        <p>
+            <input class="form-control input-lg" type="text" ng-model="credentials.username" placeholder="login"
+                   watch-autofill>
+        </p>
+
+        <p>
+            <input class="form-control input-lg" type="password" ng-model="credentials.password" placeholder="password"
+                   watch-autofill>
+        </p>
+
+        <div class="checkbox">
+            <label>
+                <input type="checkbox" ng-model="credentials.remember_me"/> Remember me
+            </label>
+        </div>
+
+        <button class="btn btn-primary btn-lg btn-block" ng-click="login()" type="submit">Sing In</button>
+        <br>
+        <a href="/#/forgetPassword">I can't access my account</a>
+    </form>
+    <div id="fb-root"></div>
+    <fb:login-button show-faces="false" width="400" max-rows="1" size="large"></fb:login-button>
+    <img ng-click="loginWithTwitter()" src="/resources/img/sign-in-with-twitter.png">
+</div>
+
+
+

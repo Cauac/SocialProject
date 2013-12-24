@@ -1,0 +1,22 @@
+<div ng-include src=" 'resources/html/secure/menu.html' "></div>
+<div class="panel panel-primary" style="max-width: 1000px; margin: 0 auto 10px;">
+    <div class="panel-heading">
+        <h3 class="text-center">ERRORS</h3>
+    </div>
+    <div class="panel-body">
+        <table class="table table-bordered table-striped" style="width:980px;" ng-show="errors.length > 0">
+            <thead>
+            <tr>
+                <th style="text-align: center;">Error message</th>
+                <th style="text-align: center;">Date</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="error in errors">
+                <td>{{error.message}}</td>
+                <td>{{error.date}}</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

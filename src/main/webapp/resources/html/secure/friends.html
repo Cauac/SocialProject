@@ -1,0 +1,34 @@
+<div ng-include src=" 'resources/html/secure/menu.html' "></div>
+<div class="panel panel-primary" style="max-width: 1000px; margin: 0 auto 10px;">
+    <div class="panel-heading">
+        <h3 class="text-center">MY FRIENDS</h3>
+    </div>
+    <div class="panel-body">
+        <label class="control-label">User Name:</label>
+        <input ng-model="usernameSearch" ng-change="search()">
+        <table class="table table-bordered table-striped" style="width:980px;" ng-show="friends.length > 0">
+            <thead>
+            <tr>
+                <th style="text-align: center;">User Name</th>
+                <th style="text-align: center;">Real Name</th>
+                <th style="text-align: center;">Location</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="friend in friends">
+                <td>{{friend.username}}</td>
+                <td>{{friend.realname}}</td>
+                <td>{{friend.location}}</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <pagination total-items="totalSize" items-per-page="itemPerPage" page="currentPage" max-size="maxSize"
+                class="pagination-small" boundary-links="true" num-pages="numPages"
+                on-select-page="pageChanged(page)">
+    </pagination>
+
+    <div class="panel-footer">
+        <pre>Page: {{currentPage}} / {{numPages}}</pre>
+    </div>
+</div>
