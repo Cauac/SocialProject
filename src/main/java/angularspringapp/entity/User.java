@@ -14,8 +14,8 @@ public class User {
     private String username;
     private String password;
     private boolean isBanned = false;
-    private List<Audit> auditList = new ArrayList<>();
-    private List<Payment> paymentList = new ArrayList<>();
+    private List<Audit> auditList = new ArrayList();
+    private List<Payment> paymentList = new ArrayList();
 
     @Column(updatable = false)
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

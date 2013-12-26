@@ -3,16 +3,15 @@ package angularspringapp.contoller;
 import angularspringapp.dao.MSSQLUserDAO;
 import angularspringapp.entity.Payment;
 import angularspringapp.entity.User;
+import au.com.bytecode.opencsv.CSVReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
 
@@ -20,9 +19,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.Node;
 import org.w3c.dom.Element;
-
-import org.apache.commons.fileupload.FileItemIterator;
-import org.apache.commons.fileupload.servlet.ServletFileUpload;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -40,17 +36,14 @@ public class FileUploadController implements Serializable {
     MSSQLUserDAO userDAO;
 
     @RequestMapping(value = "uploadPaymentFile.xml", method = RequestMethod.POST)
-    public void uploadXML(HttpServletRequest req, HttpServletResponse res) {
+    public void uploadXML(@RequestBody String fileData) {
         String name = SecurityContextHolder.getContext().getAuthentication().getName();
         User currentUser = userDAO.findByName(name);
         List<Payment> payments = new ArrayList();
 
         try {
-            ServletFileUpload upload = new ServletFileUpload();
-            FileItemIterator iterator = upload.getItemIterator(req);
-            iterator.next();
             DocumentBuilder dBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-            Document doc = dBuilder.parse(iterator.next().openStream());
+            Document doc = dBuilder.parse(new ByteArrayInputStream(fileData.getBytes()));
             doc.getDocumentElement().normalize();
             NodeList nList = doc.getElementsByTagName("service");
             for (int temp = 0; temp < nList.getLength(); temp++) {
@@ -75,18 +68,14 @@ public class FileUploadController implements Serializable {
     }
 
     @RequestMapping(value = "uploadPaymentFile.xlsx", method = RequestMethod.POST)
-    public void uploadXLSX(HttpServletRequest req) {
+    public void uploadXLSX(@RequestBody String fileData) {
         String name = SecurityContextHolder.getContext().getAuthentication().getName();
         User currentUser = userDAO.findByName(name);
 
         try {
-            ServletFileUpload upload = new ServletFileUpload();
-            FileItemIterator iterator = upload.getItemIterator(req);
-            iterator.next();
-
             DocumentBuilder dBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
             File file = File.createTempFile("entry", "xslx");
-            writeFile(iterator.next().openStream(), new FileOutputStream(file));
+            writeFile(new ByteArrayInputStream(fileData.getBytes()), new FileOutputStream(file));
             ZipFile zipFile = new ZipFile(file);
             Enumeration files = zipFile.entries();
 
@@ -105,15 +94,38 @@ public class FileUploadController implements Serializable {
 
             String[] sharedStrings = readSharedStrings(sharedStringDoc);
             Node sheetData = sheetDoc.getDocumentElement().getElementsByTagName("sheetData").item(0);
-            Collection<Payment> payments = readPaymentsFromSheerData(currentUser, sheetData, sharedStrings);
+            Collection<Payment> payments = readPaymentsFromSheetData(currentUser, sheetData, sharedStrings);
             userDAO.savePayments(payments);
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
     }
 
-    private Collection<Payment> readPaymentsFromSheerData(User user, Node sheetData, String[] sharedStrings) {
-        Collection<Payment> payments = new ArrayList<>();
+    @RequestMapping(value = "uploadPaymentFile.csv", method = RequestMethod.POST)
+    public void uploadCSV(@RequestBody String fileData, HttpServletResponse response) {
+        String name = SecurityContextHolder.getContext().getAuthentication().getName();
+        User currentUser = userDAO.findByName(name);
+        try {
+            Collection<Payment> payments = new ArrayList();
+            CSVReader reader = new CSVReader(new StringReader(fileData));
+            List<String[]> entries = reader.readAll();
+            for (String[] entry : entries) {
+                Payment payment = new Payment();
+                payment.setServiceName(entry[0].trim());
+                payment.setYear(Integer.parseInt(entry[1].trim()));
+                payment.setMonth(Integer.parseInt(entry[2].trim()));
+                payment.setAmount(Integer.parseInt(entry[3].trim()));
+                payment.setUser(currentUser);
+            }
+            userDAO.savePayments(payments);
+            response.setStatus(HttpServletResponse.SC_OK);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    private Collection<Payment> readPaymentsFromSheetData(User user, Node sheetData, String[] sharedStrings) {
+        Collection<Payment> payments = new ArrayList();
         NodeList rows = sheetData.getChildNodes();
 
         for (int i = 1; i < rows.getLength(); i++) {

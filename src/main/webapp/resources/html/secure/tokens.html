@@ -13,14 +13,7 @@
     <h3 class="text-center">PAYMENT</h3>
     <div ng-show="alertMessage" class="alert alert-danger">Allowed only xml/xls/xlsx/csv payment files</div>
     <div ng-show="successMessage" class="alert alert-success">Payment is accepted</div>
-    <div ng-file-drop="onFileSelect($files)"  class="drop-box"
-         ng-show="dropSupported">Drop files here</div>
-    <div ng-file-drop-available="dropSupported=true"
-         ng-show="!dropSupported">HTML5 Drop File is not supported!</div>
+    <div ng-file-drop="onFileSelect($files)"  class="drop-box" ng-show="dropSupported">Drop files here</div>
+    <div ng-file-drop-available="dropSupported=true" ng-show="!dropSupported">HTML5 Drop File is not supported!</div>
     <input type="file" ng-file-select="onFileSelect($files)" class="btn-block btn-default">
-    <div class="progress progress-striped active">
-        <div class="progress-bar"  role="progressbar" aria-valuenow="{{percent}}" aria-valuemin="0" aria-valuemax="100" style="width: {{percent}}%">
-            <span class="sr-only">{{percent}}% Complete</span>
-        </div>
-    </div>
 </div>

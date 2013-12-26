@@ -4,9 +4,9 @@
  * FileUploadController
  * @constructor
  */
-var FileUploadController = function ($scope, $upload, $modal) {
+var FileUploadController = function ($scope, $http) {
 
-    $scope.percent = 0;
+    $scope.file;
     $scope.alertMessage = false;
     $scope.successMessage = false;
 
@@ -19,24 +19,21 @@ var FileUploadController = function ($scope, $upload, $modal) {
                 $scope.alertMessage = true;
                 return;
             }
-            $scope.upload = $upload.upload({
-                url: 'uploadPaymentFile.' + type,
-                data: {myObj: $scope.myModelObj},
-                file: file
-            }).progress(function (evt) {
-                    $scope.percent = parseInt(100.0 * evt.loaded / evt.total)
-                }).success(function () {
-                    $scope.successMessage = true;
-                });
+            $http.post('uploadPaymentFile.' + type, file).success(function () {
+                $scope.successMessage = true;
+            });
         }
     };
 
     $scope.getType = function (file) {
         if (file.type == 'text/xml') {
-            return 'xlm';
+            return 'xml';
         }
         if (file.type == 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
             return 'xlsx';
+        }
+        if (file.type == 'application/vnd.ms-excel') {
+            return 'csv';
         }
     }
 }
