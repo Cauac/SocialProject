@@ -8,6 +8,7 @@ var FileUploadController = function ($scope, $upload, $modal) {
 
     $scope.percent = 0;
     $scope.alertMessage = false;
+    $scope.successMessage = false;
 
     $scope.onFileSelect = function ($files) {
         //$files: an array of files selected, each file has name, size, and type.
@@ -21,19 +22,11 @@ var FileUploadController = function ($scope, $upload, $modal) {
             $scope.upload = $upload.upload({
                 url: 'uploadPaymentFile.' + type,
                 data: {myObj: $scope.myModelObj},
-                file: file,
+                file: file
             }).progress(function (evt) {
                     $scope.percent = parseInt(100.0 * evt.loaded / evt.total)
-                }).success(function (data, status, headers, config) {
-                    var modalInstance = $modal.open({
-                        templateUrl: 'resources/html/paymentSuccess.html',
-                        controller: ModalInstanceCtrl3,
-                        resolve: {
-                            text: function () {
-                                return data;
-                            }
-                        }
-                    });
+                }).success(function () {
+                    $scope.successMessage = true;
                 });
         }
     };
@@ -47,13 +40,3 @@ var FileUploadController = function ($scope, $upload, $modal) {
         }
     }
 }
-
-
-var ModalInstanceCtrl3 = function ($scope, $modalInstance, text) {
-
-    $scope.text = text;
-
-    $scope.ok = function () {
-        $modalInstance.close();
-    };
-};

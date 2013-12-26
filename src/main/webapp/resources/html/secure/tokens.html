@@ -11,7 +11,8 @@
 
 <div class="well" style="max-width: 400px; margin: 0 auto 10px;" ng-controller="FileUploadController">
     <h3 class="text-center">PAYMENT</h3>
-    <div ng-show="alertMessage" class="alert alert-danger">Allowed only xml payment files</div>
+    <div ng-show="alertMessage" class="alert alert-danger">Allowed only xml/xls/xlsx/csv payment files</div>
+    <div ng-show="successMessage" class="alert alert-success">Payment is accepted</div>
     <div ng-file-drop="onFileSelect($files)"  class="drop-box"
          ng-show="dropSupported">Drop files here</div>
     <div ng-file-drop-available="dropSupported=true"
