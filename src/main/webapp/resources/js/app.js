@@ -141,7 +141,7 @@ App.factory("AuthenticationService", function ($rootScope, $http, SessionService
     };
 
     var refreshUserInfo = function () {
-        $http.get("getUserInfo").success(function (userInfo) {
+        $http.get('getUserInfo',{ params: {'uid': new Date().getTime() }}).success(function (userInfo) {
             if (userInfo.role == 'ROLE_ANONYMOUS') {
                 return;
             }
