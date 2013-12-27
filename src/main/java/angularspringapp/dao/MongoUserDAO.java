@@ -1,13 +1,11 @@
 package angularspringapp.dao;
 
-import com.googlecode.ehcache.annotations.Cacheable;
 import com.mongodb.*;
 
 public class MongoUserDAO extends MongoDAO{
 
     private static final String USER_COLLECTION = "user";
 
-    @Cacheable(cacheName = "userCache")
     public DBObject read(String identity) {
         return database.getCollection(USER_COLLECTION).findOne(new BasicDBObject("_id", identity));
     }
