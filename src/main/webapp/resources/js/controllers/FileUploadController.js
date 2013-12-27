@@ -26,14 +26,6 @@ var FileUploadController = function ($scope, $http) {
     };
 
     $scope.getType = function (file) {
-        if (file.type == 'text/xml') {
-            return 'xml';
-        }
-        if (file.type == 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
-            return 'xlsx';
-        }
-        if (file.type == 'application/vnd.ms-excel') {
-            return 'csv';
-        }
+        return file.name.split('.')[1];
     }
 }

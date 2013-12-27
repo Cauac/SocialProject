@@ -4,6 +4,9 @@ import angularspringapp.dao.MSSQLUserDAO;
 import angularspringapp.entity.Payment;
 import angularspringapp.entity.User;
 import au.com.bytecode.opencsv.CSVReader;
+import jxl.Cell;
+import jxl.Sheet;
+import jxl.Workbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -36,14 +39,14 @@ public class FileUploadController implements Serializable {
     MSSQLUserDAO userDAO;
 
     @RequestMapping(value = "uploadPaymentFile.xml", method = RequestMethod.POST)
-    public void uploadXML(@RequestBody String fileData) {
+    public void uploadXML(@RequestBody byte[] fileData, HttpServletResponse response) {
         String name = SecurityContextHolder.getContext().getAuthentication().getName();
         User currentUser = userDAO.findByName(name);
         List<Payment> payments = new ArrayList();
 
         try {
             DocumentBuilder dBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-            Document doc = dBuilder.parse(new ByteArrayInputStream(fileData.getBytes()));
+            Document doc = dBuilder.parse(new ByteArrayInputStream(fileData));
             doc.getDocumentElement().normalize();
             NodeList nList = doc.getElementsByTagName("service");
             for (int temp = 0; temp < nList.getLength(); temp++) {
@@ -62,20 +65,21 @@ public class FileUploadController implements Serializable {
                 }
             }
             userDAO.savePayments(payments);
+            response.setStatus(HttpServletResponse.SC_OK);
         } catch (Exception ex) {
             System.out.println(ex.getMessage());
         }
     }
 
     @RequestMapping(value = "uploadPaymentFile.xlsx", method = RequestMethod.POST)
-    public void uploadXLSX(@RequestBody String fileData) {
+    public void uploadXLSX(@RequestBody byte[] fileData, HttpServletResponse response) {
         String name = SecurityContextHolder.getContext().getAuthentication().getName();
         User currentUser = userDAO.findByName(name);
 
         try {
             DocumentBuilder dBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
             File file = File.createTempFile("entry", "xslx");
-            writeFile(new ByteArrayInputStream(fileData.getBytes()), new FileOutputStream(file));
+            writeFile(new ByteArrayInputStream(fileData), new FileOutputStream(file));
             ZipFile zipFile = new ZipFile(file);
             Enumeration files = zipFile.entries();
 
@@ -96,6 +100,7 @@ public class FileUploadController implements Serializable {
             Node sheetData = sheetDoc.getDocumentElement().getElementsByTagName("sheetData").item(0);
             Collection<Payment> payments = readPaymentsFromSheetData(currentUser, sheetData, sharedStrings);
             userDAO.savePayments(payments);
+            response.setStatus(HttpServletResponse.SC_OK);
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
@@ -116,6 +121,35 @@ public class FileUploadController implements Serializable {
                 payment.setMonth(Integer.parseInt(entry[2].trim()));
                 payment.setAmount(Integer.parseInt(entry[3].trim()));
                 payment.setUser(currentUser);
+            }
+            userDAO.savePayments(payments);
+            response.setStatus(HttpServletResponse.SC_OK);
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    @RequestMapping(value = "uploadPaymentFile.xls", method = RequestMethod.POST)
+    public void uploadXLS(@RequestBody byte[] fileData, HttpServletResponse response) {
+        String name = SecurityContextHolder.getContext().getAuthentication().getName();
+        User currentUser = userDAO.findByName(name);
+
+        try {
+            File file = File.createTempFile("workbook", ".xls");
+            writeFile(new ByteArrayInputStream(fileData), new FileOutputStream(file));
+            Workbook workbook = Workbook.getWorkbook(file);
+            Sheet sheet = workbook.getSheet(0);
+            int rows = sheet.getRows();
+            List<Payment> payments = new ArrayList(rows - 1);
+            for (int i = 1; i < rows; i++) {
+                Cell[] cells = sheet.getRow(i);
+                Payment payment = new Payment();
+                payment.setServiceName(cells[0].getContents());
+                payment.setYear(Integer.parseInt(cells[1].getContents()));
+                payment.setMonth(Integer.parseInt(cells[2].getContents()));
+                payment.setAmount(Integer.parseInt(cells[3].getContents()));
+                payment.setUser(currentUser);
+                payments.add(payment);
             }
             userDAO.savePayments(payments);
             response.setStatus(HttpServletResponse.SC_OK);
